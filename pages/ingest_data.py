@@ -312,7 +312,7 @@ if st.session_state.get('file_name'):
             expander = st.expander("Ingestion History")
             expander.table(gk)
             if chart_start_date and chart_end_date:
-                st.line_chart(gk, x="DATE", use_container_width=True)
+                st.bar_chart(gk, x="DATE", use_container_width=True)
         except:
             st.info("No data has been ingested yet!")
     
