@@ -12,7 +12,6 @@ import humanize
 from st_aggrid import AgGrid, JsCode, ColumnsAutoSizeMode
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from streamlit_pandas_profiling import st_profile_report
-from ydata_profiling import ProfileReport
 from snowflake.snowpark.functions import when_matched, when_not_matched, lit
 
 
