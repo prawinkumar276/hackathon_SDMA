@@ -2,5 +2,5 @@ snowflake-snowpark-python
 pandas
 streamlit_pandas_profiling
 soda-core-snowflake
-st_aggrid
+streamlit-aggrid
 humanize
