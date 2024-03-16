@@ -1,0 +1,19 @@
+data_source hackathon:
+   type: snowflake
+   connection:
+     username: PRAVEEN
+     password: Prawin@276
+     account: QGONQBX-JU39310
+     database: MANAGE_DB
+     warehouse: compute_wh
+     role: ACCOUNTADMIN
+     session_parameters:
+       QUERY_TAG: soda-queries
+       QUOTED_IDENTIFIERS_IGNORE_CASE: false
+   schema: EXTERNAL_STAGES
+
+
+soda_cloud:
+  host: cloud.soda.io
+  api_key_id: 6a39afdc-20d9-4d7f-a7a0-3d61e817fb0b
+  api_key_secret: PXoVqSp4f7hmhi0fH9ygOtEZObVq_vfkY6Z4BEAjUEGODE_E5XKyeQ

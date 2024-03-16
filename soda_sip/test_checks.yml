@@ -1,0 +1,16 @@
+checks for TEST:
+   # Checks that dataset contains fewer than 2 rows; written to fail
+     - row_count < 2:
+         name: Dataset is unreasonably small
+   # Checks that column contains no NULL values
+     - missing_count(Name) = 0:
+         name: Not Null check in Name
+   # Checks for columns removed or added, or changed type or index 
+     - schema:
+         warn:
+           when schema changes: any
+         name: No changes to schema
+     - invalid_count(Age) = 0:
+         valid min: 1
+         valid max: 100
+         name: Valid Age Check
