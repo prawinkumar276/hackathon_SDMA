@@ -169,7 +169,7 @@ if st.session_state.get('file_name'):
                 #Audit Table Creation
                 audit_tbl_res = session.sql(f"CREATE TABLE IF NOT EXISTS {table_name}_audit ({audit_col_str})").collect()
 
-                #Audit Table Creation
+                #Task Creation for moving data from Stream to Audit table
                 audit_tbl_res = session.sql(f'CREATE TASK IF NOT EXISTS {table_name}_streamtask\
                     WAREHOUSE = COMPUTE_WH\
                     SCHEDULE = \'1 minute\'\
@@ -177,10 +177,14 @@ if st.session_state.get('file_name'):
                     SYSTEM$STREAM_HAS_DATA(\'{table_name.upper()}_STREAM\')\
                     AS\
                     INSERT INTO {table_name.upper()}_AUDIT SELECT * FROM {table_name.upper()}_STREAM').collect()
+                
                 t = session.table(table_name)
                 result = t.merge(selected_data, (eval(in_cond_str)),
                 [when_matched(eval(up_cond_str)).update(eval(value_str)),
                 when_not_matched().insert(eval(value_str))])
+
+                #Resume Streamtask
+                resume_task_res = session.sql(f"ALTER TASK IF EXISTS {table_name}_streamtask RESUME").collect()
 
                 st.info(f"Selected records ingested to the {table_name.upper()} table: {result}")
                     
@@ -300,16 +304,19 @@ if st.session_state.get('file_name'):
                 st.info(result)
     
     with tab5:
-        default_date = date(2024, 1, 1)
-        col1, col2 = st.columns(2)
-        chart_start_date=col1.date_input("Select Start Date",value=default_date)
-        chart_end_date=col2.date_input("Select End Date")
-        gk=session.sql(f'select CAST("Created Date" AS DATE) AS DATE,count(CAST("Created Date" AS DATE)) AS INSERTED, count(CAST("Modified Date" AS DATE)) AS UPDATED from {table_name}\
-                         where CAST("Created Date" AS DATE) between \'{chart_start_date}\' AND \'{chart_end_date}\' group by CAST("Created Date" AS DATE)').collect()
-        expander = st.expander("Ingestion History")
-        expander.table(gk)
-        if chart_start_date and chart_end_date:
-            st.line_chart(gk, x="DATE", use_container_width=True)
+        try:
+            default_date = date(2024, 1, 1)
+            col1, col2 = st.columns(2)
+            chart_start_date=col1.date_input("Select Start Date",value=default_date)
+            chart_end_date=col2.date_input("Select End Date")
+            gk=session.sql(f'select CAST("Created Date" AS DATE) AS DATE,count(CAST("Created Date" AS DATE)) AS INSERTED, count(CAST("Modified Date" AS DATE)) AS UPDATED from {table_name}\
+                            where CAST("Created Date" AS DATE) between \'{chart_start_date}\' AND \'{chart_end_date}\' group by CAST("Created Date" AS DATE)').collect()
+            expander = st.expander("Ingestion History")
+            expander.table(gk)
+            if chart_start_date and chart_end_date:
+                st.line_chart(gk, x="DATE", use_container_width=True)
+        except:
+            st.info("No data has been ingested yet!")
     
     with tab6:
         table_name = st.session_state.get('table_name')
