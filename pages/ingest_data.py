@@ -209,8 +209,6 @@ if st.session_state.get('file_name'):
             AgGrid(
                 audit_df, 
                 gridOptions = gridoptions,
-                columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
-                wrapText=  True,
                 theme = 'alpine',
                 fit_columns_on_grid_load=False
             )
@@ -352,8 +350,6 @@ if st.session_state.get('file_name'):
                 AgGrid(
                     scan_result_df, 
                     gridOptions = gridoptions1,
-                    columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
-                    wrapText=  True,
                     theme = 'alpine'
                 )
     
