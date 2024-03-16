@@ -200,7 +200,7 @@ if st.session_state.get('file_name'):
             # st.dataframe(audit_df[["Date and Time", "Old Value", "New Value", "Action", "SDM User"]], hide_index=True, use_container_width=True)
             audit_df = audit_df[["Date and Time", "Old Value", "New Value", "Action", "SDM User"]]
             gd = GridOptionsBuilder.from_dataframe(audit_df)
-            gd.configure_default_column(editable=False, wrap_text=True)
+            gd.configure_default_column(editable=False)
             gd.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=30)
             gridoptions = gd.build()
 
@@ -343,7 +343,7 @@ if st.session_state.get('file_name'):
                 scan_result_df.rename(columns=str.title, inplace=True)
                 
                 gd1 = GridOptionsBuilder.from_dataframe(scan_result_df)
-                gd1.configure_default_column(editable=False, wrap_text=True)
+                gd1.configure_default_column(editable=False)
                 # gd1.configure_pagination(enabled=False, paginationAutoPageSize=False, paginationPageSize=30)
                 gridoptions1 = gd1.build()
 

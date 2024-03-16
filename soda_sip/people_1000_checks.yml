@@ -8,18 +8,18 @@ checks for PEOPLE_1000:
     - invalid_percent("First Name") = 0:
         valid max length: 30
         name: Name maximum length check
-    - missing_count(Email) = 0:
+    - missing_count(EMAIL) = 0:
         name: Not null check in Email
-    - invalid_percent(Phone) < 1 %:
+    - invalid_percent(PHONE) < 1 %:
         valid format: phone number
         name: Valid Phone number check
-    - invalid_count(Sex) = 0:
+    - invalid_count(SEX) = 0:
         valid values: ['Male', 'Female']
         name: Valid Sex check
-    - invalid_count(Email) = 0:
+    - invalid_count(EMAIL) = 0:
         valid format: email
         name: Valid Email check
-    - invalid_count("Date Of birth") = 0:
+    - invalid_count("Date of birth") = 0:
         valid format: date iso 8601
         name: Date format check
      
