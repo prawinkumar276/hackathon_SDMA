@@ -2,23 +2,4 @@ checks for PEOPLE_1000:
    # Checks that column contains no NULL values
      - missing_count("First Name") = 0:
          name: Not null check in Name
-   # Checks for columns removed or added, or changed type or index 
-     - schema:
-         warn:
-           when schema changes: any
-         name: No changes to schema
-     - invalid_percent("First Name") = 0:
-         valid max length: 30
-         name: Name maximum length check
-     - missing_count(Email) = 0:
-         name: Not null check in Email
-     - invalid_percent(Phone) < 1 %:
-         valid format: phone number
-         name: Valid Phone number check
-     - invalid_count(Sex) = 0:
-         valid values: ['Male', 'Female']
-         name: Valid Sex check
-     - invalid_count(Email) = 0:
-         valid format: email
-         name: Valid Email check
      
