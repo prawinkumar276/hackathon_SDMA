@@ -1,16 +1,16 @@
 data_source hackathon:
-   type: snowflake
-   connection:
-     username: PRAVEEN
-     password: Prawin@276
-     account: QGONQBX-JU39310
-     database: MANAGE_DB
-     warehouse: compute_wh
-     role: ACCOUNTADMIN
-     session_parameters:
-       QUERY_TAG: soda-queries
-       QUOTED_IDENTIFIERS_IGNORE_CASE: false
-   schema: EXTERNAL_STAGES
+  type: snowflake
+  connection:
+    username: PRAVEEN
+    password: Prawin@276
+    account: QGONQBX-JU39310
+    database: MANAGE_DB
+    warehouse: compute_wh
+    role: ACCOUNTADMIN
+    session_parameters:
+      QUERY_TAG: soda-queries
+      QUOTED_IDENTIFIERS_IGNORE_CASE: false
+  schema: EXTERNAL_STAGES
 
 
 soda_cloud:
