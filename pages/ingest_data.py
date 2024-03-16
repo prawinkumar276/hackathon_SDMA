@@ -18,7 +18,7 @@ from snowflake.snowpark.functions import when_matched, when_not_matched, lit
 
 st.set_page_config(
      page_title="Simple Data Management Application",
-     page_icon="🧊",
+     page_icon="shamrock",
      layout="wide",
      initial_sidebar_state="expanded",
  )

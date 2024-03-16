@@ -1,6 +1,10 @@
 import streamlit as st
 from snowflake.snowpark.session import Session
 
+st.set_page_config(page_title="Simple Data Management Application",
+     page_icon="shamrock",
+     initial_sidebar_state="collapsed")
+
 connection_parameters = {
     "account": "QGONQBX-JU39310",
     "user": "PRAVEEN",

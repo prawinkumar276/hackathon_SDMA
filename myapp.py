@@ -2,7 +2,9 @@ import streamlit as st
 from time import sleep
 from snowflake.snowpark.session import Session
 
-st.set_page_config(initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Simple Data Management Application",
+     page_icon="shamrock",
+     initial_sidebar_state="collapsed")
 
 connection_parameters = {
     "account": "QGONQBX-JU39310",
