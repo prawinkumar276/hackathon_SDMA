@@ -9,9 +9,10 @@ import re
 from soda.scan import Scan
 import os.path
 import humanize
-from st_aggrid import AgGrid, JsCode, ColumnsAutoSizeMode
+from st_aggrid import AgGrid, JsCode, GridUpdateMode
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from streamlit_pandas_profiling import st_profile_report
+from ydata_profiling import ProfileReport
 from snowflake.snowpark.functions import when_matched, when_not_matched, lit
 
 
@@ -84,7 +85,7 @@ with st.sidebar:
 col1, col2, col3, col4, col5, col6, col7= st.columns(7)
 col7.button('Refresh Data')
         
-@st.cache_data(ttl=30,show_spinner=False)
+@st.cache_data(ttl=60,show_spinner=False)
 def get_file_data(filename):
     file_df = pd.DataFrame(session.read.option("INFER_SCHEMA", True).option("PARSE_HEADER", True).csv(f"@{stage_name}/{filename}").collect())
     file_df.columns = file_df.columns.str.strip()
@@ -92,7 +93,7 @@ def get_file_data(filename):
     return file_df
 
 if st.session_state.get('file_name'):
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Data Ingestion", "Data Audit", "Data Analysis","Update Table","Ingestion Graph","Data Quality Checks"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Data Ingestion", "Data Analysis","Update Table", "Data Audit","Ingestion Graph","Data Quality Checks"])
     
 if st.session_state.get('file_name'):
     with tab1:                                       ############# Data Ingestion ##############
@@ -113,9 +114,7 @@ if st.session_state.get('file_name'):
                 df_file, 
                 gridOptions = gridoptions, 
                 allow_unsafe_jscode = True,
-                theme = 'balham',
-                # height = 200,
-                fit_columns_on_grid_load = False
+                theme = 'balham'
             )
 
         selected_rows = return_value["selected_rows"]
@@ -187,40 +186,8 @@ if st.session_state.get('file_name'):
                 resume_task_res = session.sql(f"ALTER TASK IF EXISTS {table_name}_streamtask RESUME").collect()
 
                 st.info(f"Selected records ingested to the {table_name.upper()} table: {result}")
-                    
-    with tab2:                                       ############# Data Audit ##############
-        audit_table = st.session_state.get('table_name') + "_audit"
-        try: 
-            audit_df = session.sql(f"SELECT * FROM MANAGE_DB.EXTERNAL_STAGES.{audit_table} WHERE METADATA$ACTION != 'DELETE'").collect()
-            audit_df = pd.DataFrame(audit_df)
-            block_cols = ["ID", "Created Date", "Modified Date", "METADATA$ACTION", "METADATA$UPDATE", "METADATA$ROW_ID"]
-            audit_df_cols = [i for i in audit_df.columns if i not in block_cols]
-            audit_df["Action"] = audit_df[["METADATA$ACTION", "METADATA$UPDATE"]].apply(lambda x: "Update" if x["METADATA$ACTION"] == "INSERT" and x["METADATA$UPDATE"] == "true" else "Insert", axis=1)
-            audit_df["Date and Time"] = audit_df[["Created Date", "Modified Date"]].apply(lambda x: x["Modified Date"] if x["Modified Date"] else x["Created Date"], axis=1)
-            audit_df["New Value"] = audit_df[audit_df_cols].apply(lambda x: x.to_json(), axis=1)
-            audit_df['Old Value'] = audit_df.groupby(['ID'])['New Value'].shift(1)
-            audit_df = audit_df.sort_values("Date and Time", ascending=False)
-
-            # st.dataframe(audit_df[["Date and Time", "Old Value", "New Value", "Action", "SDM User"]], hide_index=True, use_container_width=True)
-            audit_df = audit_df[["Date and Time", "Old Value", "New Value", "Action", "SDM User"]]
-            gd = GridOptionsBuilder.from_dataframe(audit_df)
-            gd.configure_default_column(editable=False)
-            gd.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=30)
-            gridoptions = gd.build()
-
-            st.markdown('<div style="text-align: right;">Note: <span style="color:#33D1FF">Audit data is refreshed every 1 minute, Please click the \'Refresh Data\' button</span></div>', unsafe_allow_html=True)
-            
-            AgGrid(
-                audit_df, 
-                gridOptions = gridoptions,
-                theme = 'alpine',
-                fit_columns_on_grid_load=False
-            )
-        except:
-            st.write("No audit log data!")
-            
         
-    with tab3:                                       ############# Data Analysis ##############    
+    with tab2:                                       ############# Data Analysis ##############    
         with st.expander("Data Analysis"):
             col1, col2 = st.columns(2)
             with col1:
@@ -241,7 +208,7 @@ if st.session_state.get('file_name'):
                 dis_download_btn = False
             with col2:
                 st.download_button(label="Download Full Report", data=export, file_name='report.html', disabled=dis_download_btn)
-    with tab4:                                       ############# Data Table ##############
+    with tab3:                                       ############# Data Table ##############
         table_name = st.session_state.get('table_name')
         try:
             users = session.sql(f"SELECT * FROM MANAGE_DB.EXTERNAL_STAGES.{table_name}").collect()
@@ -302,7 +269,38 @@ if st.session_state.get('file_name'):
 
                 result = t.merge(selected_data, (eval(in_cond_str)), [when_matched(eval(up_cond_str)).update(eval(value_str))])
                 st.info(result)
-    
+                    
+    with tab4:                                       ############# Data Audit ##############
+        audit_table = st.session_state.get('table_name') + "_audit"
+        try: 
+            audit_df = session.sql(f"SELECT * FROM MANAGE_DB.EXTERNAL_STAGES.{audit_table} WHERE METADATA$ACTION != 'DELETE'").collect()
+            audit_df = pd.DataFrame(audit_df)
+            block_cols = ["ID", "Created Date", "Modified Date", "METADATA$ACTION", "METADATA$UPDATE", "METADATA$ROW_ID"]
+            audit_df_cols = [i for i in audit_df.columns if i not in block_cols]
+            audit_df["Action"] = audit_df[["METADATA$ACTION", "METADATA$UPDATE"]].apply(lambda x: "Update" if x["METADATA$ACTION"] == "INSERT" and x["METADATA$UPDATE"] == "true" else "Insert", axis=1)
+            audit_df["Date and Time"] = audit_df[["Created Date", "Modified Date"]].apply(lambda x: x["Modified Date"] if x["Modified Date"] else x["Created Date"], axis=1)
+            audit_df["New Value"] = audit_df[audit_df_cols].apply(lambda x: x.to_json(), axis=1)
+            audit_df['Old Value'] = audit_df.groupby(['ID'])['New Value'].shift(1)
+            audit_df = audit_df.sort_values("Date and Time", ascending=False)
+
+            # st.dataframe(audit_df[["Date and Time", "Old Value", "New Value", "Action", "SDM User"]], hide_index=True, use_container_width=True)
+            audit_df = audit_df[["Date and Time", "Old Value", "New Value", "Action", "SDM User"]]
+            gd = GridOptionsBuilder.from_dataframe(audit_df)
+            gd.configure_default_column(editable=False)
+            gd.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=30)
+            gridoptions = gd.build()
+
+            st.markdown('<div style="text-align: right;">Note: <span style="color:#33D1FF">Audit data is refreshed every 1 minute, Please click the \'Refresh Data\' button</span></div>', unsafe_allow_html=True)
+            
+            AgGrid(
+                audit_df, 
+                gridOptions = gridoptions,
+                theme = 'alpine',
+                fit_columns_on_grid_load=False
+            )
+        except:
+            st.write("No audit log data!")
+
     with tab5:
         try:
             default_date = date(2024, 1, 1)
@@ -320,7 +318,6 @@ if st.session_state.get('file_name'):
     
     with tab6:
         table_name = st.session_state.get('table_name')
-        st.write(table_name)
         try:
             users = session.sql(f"SELECT * FROM MANAGE_DB.EXTERNAL_STAGES.{table_name}").collect()
         except:
