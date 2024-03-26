@@ -2,8 +2,8 @@ data_source hackathon:
   type: snowflake
   connection:
     username: PRAVEEN
-    password: Prawin@276
-    account: QGONQBX-JU39310
+    password: Prawin@2793
+    account: LMADHHY-CK04637
     database: MANAGE_DB
     warehouse: compute_wh
     role: ACCOUNTADMIN
