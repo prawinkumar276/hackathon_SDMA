@@ -6,9 +6,9 @@ st.set_page_config(page_title="Simple Data Management Application",
      initial_sidebar_state="collapsed")
 
 connection_parameters = {
-    "account": "QGONQBX-JU39310",
+    "account": "LMADHHY-CK04637",
     "user": "PRAVEEN",
-    "password": "Prawin@276",
+    "password": "Prawin@2793",
     "warehouse": "COMPUTE_WH",
     "role": "ACCOUNTADMIN",
     "database": "MANAGE_DB",
